@@ -1,16 +1,12 @@
 # visualization_functions.R
 # Functions for visualizing introgression simulation results
-# Authors: Original by Dan Bolnick, reorganized by Rogini Runghen
+# Authors: Original by Dan Bolnick, Rogini Rogini Runghen
 # Last updated: November 25, 2024
 
 library(ggplot2)
 library(patchwork)
 library(gridExtra)
 
-#' Plot replicated heatmap of allele frequencies
-#' @param sim_results Results from run_replicated_introgression
-#' @param Chr.lengths Vector of chromosome lengths
-#' @return ggplot object
 plot_replicated_heatmap <- function(sim_results, Chr.lengths = NULL) {
   freq_matrix <- sim_results$summary$mean_frequencies
   
@@ -61,6 +57,7 @@ plot_replicated_heatmap <- function(sim_results, Chr.lengths = NULL) {
   
   return(p)
 }
+
 
 #' Plot confidence intervals for selected loci
 #' @param sim_results Results from run_replicated_introgression
@@ -410,28 +407,6 @@ create_interpretation_summary <- function(metrics_df, output_dir) {
 ### Network Averaging Functions
 #############################################
 
-#' Create averaged correlation matrix from multiple replicates
-#' @param results List of simulation results for a given migration rate
-#' @return Average correlation matrix
-calculate_average_correlation <- function(results) {
-  # Extract correlation matrices from all replicates
-  cor_matrices <- lapply(results$replicates, function(rep) {
-    if(!is.null(rep$transcriptomes)) {
-      return(cor(rep$transcriptomes$r))
-    }
-    return(NULL)
-  })
-  
-  # Remove NULL entries
-  cor_matrices <- cor_matrices[!sapply(cor_matrices, is.null)]
-  
-  # Calculate average correlation matrix
-  if(length(cor_matrices) > 0) {
-    avg_cor <- Reduce('+', cor_matrices) / length(cor_matrices)
-    return(avg_cor)
-  }
-  return(NULL)
-}
 
 #' Plot averaged gene network
 #' @param cor_matrix Average correlation matrix
@@ -450,8 +425,14 @@ plot_averaged_network <- function(cor_matrix, Chr.lengths, threshold = 0.2) {
   chr_ends <- cumsum(Chr.lengths)
   chr_starts <- c(1, chr_ends[-length(chr_ends)] + 1)
   node_colors <- rep(NA, vcount(g))
-  chr_colors <- rainbow(length(Chr.lengths))
   
+  # Define custom color palette matching the figure
+  chr_colors <- c("#4DA6FF",  # light blue
+                  "#FFA500",  # orange
+                  "#FFE135",  # yellow
+                  "#2E8B57")  # green
+  
+  # Assign colors to nodes based on chromosome groups
   for(i in 1:length(Chr.lengths)) {
     node_colors[chr_starts[i]:chr_ends[i]] <- chr_colors[i]
   }
@@ -459,19 +440,13 @@ plot_averaged_network <- function(cor_matrix, Chr.lengths, threshold = 0.2) {
   # Create plot
   plot(g,
        layout = layout_in_circle(g),
-       vertex.size = 5,
+       vertex.size = 3,
        vertex.label = NA,
        vertex.color = node_colors,
-       edge.width = 1,
-       edge.color = "gray70",
-       main = "Average Gene-Gene Interaction Network")
-  
-  # Add legend for chromosomes
-  legend("topright",
-         legend = paste("Chr", 1:length(Chr.lengths)),
-         fill = chr_colors,
-         title = "Chromosome",
-         cex = 0.8)
+       edge.width = 0.5,
+       edge.color = "gray80"#,
+       #main = paste("Gene Network (migration rate =", ifelse(threshold == 0, "0", "1"), ")")
+  )
   
   return(g)
 }
@@ -484,17 +459,25 @@ plot_averaged_heatmap <- function(cor_matrix, Chr.lengths, migration_rate) {
   # Add chromosome boundaries
   chr_ends <- cumsum(Chr.lengths)
   
+  # Create custom color palette matching the figure
+  heatmap_colors <- colorRampPalette(c("#FFFFD4",  # light yellow
+                                       "#FED98E",    # medium yellow
+                                       "#FE9929",    # orange
+                                       "#CC4C02"))(100)  # dark orange/red
+  
   # Create heatmap
   heatmap(cor_matrix,
           Rowv = NA,
           Colv = NA,
-          col = colorRampPalette(c("blue", "white", "red"))(100),
-          main = sprintf("Average Gene Expression Correlation\nMigration Rate: %.6f", migration_rate))
+          col = heatmap_colors#,
+          #main = paste("Gene Expression Correlation (migration rate =", 
+          #             ifelse(migration_rate == 0, "0", "1"), ")")
+  )
   
   # Add chromosome boundary lines
   for(pos in chr_ends) {
-    abline(h = pos + 0.5, col = "black", lwd = 2)
-    abline(v = pos + 0.5, col = "black", lwd = 2)
+    abline(h = pos + 0.5, col = "blue", lwd = 1)
+    abline(v = pos + 0.5, col = "blue", lwd = 1)
   }
 }
 
@@ -520,50 +503,130 @@ generate_network_visualizations <- function(results_list, Chr.lengths, threshold
       # Generate and save heatmap
       png(file.path(output_dir, "averaged_heatmaps", 
                     sprintf("avg_heatmap_mig%.6f.png", as.numeric(rate))),
-          width = 800, height = 800, res = 100)
+          width = 800, height = 800, res = 150)
+      par(mar = c(5,5,4,2))
       plot_averaged_heatmap(avg_cor, Chr.lengths, as.numeric(rate))
       dev.off()
       
       # Generate and save network plot
       png(file.path(output_dir, "averaged_networks", 
                     sprintf("avg_network_mig%.6f.png", as.numeric(rate))),
-          width = 800, height = 800, res = 100)
+          width = 800, height = 800, res = 150)
       par(mar = c(1,1,3,1))
       plot_averaged_network(avg_cor, Chr.lengths, threshold)
       dev.off()
     }
   }
 }
-# # Create and display the plot
-# plot <- plot_network_metrics_with_interpretation(metrics_df)
-# ggsave("output/figures/network_metrics/interpretation/combined_metrics.png", 
-#        plot, width = 10, height = 12)
-# 
-# print(plot)
-# 
-# # Get interpretation summary
-# trends <- create_interpretation_summary(metrics_df)
-# print(trends)
 
-
-
-
-# Example usage
-# if (FALSE) {
-#   # Initialize parameters
-#   params <- initialize_parameters()
-#   
-#   # Run simulations
-#   results <- run_tracked_simulations(
-#     migration_rates = c(0, 0.05, 0.5, 1),
-#     params = params,
-#     n_replicates = 10
-#   )
-#   
-#   # Create plots
-#   plots <- create_combined_visualizations(results$results, "results/plots")
-#   grid_plot <- plot_grid_introgression(results$results, params$Chr.lengths)
-#   
-#   # Save plots
-#   ggsave("results/plots/grid_plot.pdf", grid_plot, width = 15, height = 12)
-# }
+#' Generate ALL visualizations for all migration rates
+create_all_visualizations <- function(simulation_results, output_dir,
+                                      correlation_threshold = 0.2,
+                                      n_loci_ci = 5) {
+  
+  # Create network visualization if network metrics exist
+  if(!is.null(simulation_results$network_metrics)) {
+    network_plots <- plot_network_metrics_with_interpretation(
+      metrics_df = simulation_results$network_metrics,
+      output_dir = output_dir
+    )
+  } else {
+    network_plots <- NULL
+    warning("No network metrics found in simulation results")
+  }
+  
+  # Generate averaged network visualizations
+  if(!is.null(simulation_results$network_results)) {
+    cat("\nGenerating averaged network visualizations...\n")
+    
+    # Create directories if they don't exist
+    dir.create(file.path(output_dir, "network_analysis", "averaged_heatmaps"),
+               recursive = TRUE, showWarnings = FALSE)
+    dir.create(file.path(output_dir, "network_analysis", "averaged_networks"),
+               recursive = TRUE, showWarnings = FALSE)
+    
+    # Process each migration rate
+    for(rate in names(simulation_results$network_results)) {
+      result <- simulation_results$network_results[[rate]]
+      
+      # Calculate average correlation matrix
+      avg_cor <- calculate_average_correlation(result)
+      
+      if(!is.null(avg_cor)) {
+        # Generate and save averaged heatmap
+        png(file.path(output_dir, "network_analysis", "averaged_heatmaps", 
+                      sprintf("avg_heatmap_mig%.6f.png", as.numeric(rate))),
+            width = 800, height = 800, res = 100)
+        plot_averaged_heatmap(avg_cor, simulation_results$params$Chr.lengths, 
+                              as.numeric(rate))
+        dev.off()
+        
+        # Generate and save averaged network plot
+        png(file.path(output_dir, "network_analysis", "averaged_networks", 
+                      sprintf("avg_network_mig%.6f.png", as.numeric(rate))),
+            width = 800, height = 800, res = 100)
+        par(mar = c(1,1,3,1))
+        plot_averaged_network(avg_cor, simulation_results$params$Chr.lengths, 
+                              correlation_threshold)
+        dev.off()
+      }
+    }
+    cat("Network visualizations completed.\n")
+  }
+  
+  # Create grid plot if tracking results exist
+  if(!is.null(simulation_results$tracking_results$results)) {
+    grid_plot <- plot_grid_introgression(
+      simulation_results$tracking_results$results,
+      simulation_results$params$Chr.lengths,
+      n_loci_ci = n_loci_ci
+    )
+    
+    # Save grid plot
+    ggsave(
+      filename = file.path(output_dir, "figures", "migration_rates_grid.pdf"),
+      plot = grid_plot,
+      width = 15,
+      height = 12
+    )
+  } else {
+    grid_plot <- NULL
+    warning("No tracking results found in simulation results")
+  }
+  
+  # Create trends analysis if network metrics exist
+  if(!is.null(simulation_results$network_metrics)) {
+    trends <- create_interpretation_summary(
+      metrics_df = simulation_results$network_metrics,
+      output_dir = output_dir
+    )
+  } else {
+    trends <- NULL
+  }
+  
+  # Create a summary of generated visualizations
+  viz_summary <- file.path(output_dir, "visualization_summary.txt")
+  sink(viz_summary)
+  cat("Visualization Summary\n")
+  cat("====================\n\n")
+  cat("1. Network Analysis Visualizations:\n")
+  if(!is.null(simulation_results$network_results)) {
+    cat("   - Averaged heatmaps generated:", 
+        length(list.files(file.path(output_dir, "network_analysis", "averaged_heatmaps"))),
+        "files\n")
+    cat("   - Averaged networks generated:", 
+        length(list.files(file.path(output_dir, "network_analysis", "averaged_networks"))),
+        "files\n")
+  } else {
+    cat("   - No network results available\n")
+  }
+  cat("\n2. Grid Plot:", !is.null(grid_plot), "\n")
+  cat("\n3. Network Metrics Analysis:", !is.null(trends), "\n")
+  sink()
+  
+  return(list(
+    network_plots = network_plots,
+    grid_plot = grid_plot,
+    trends = trends
+  ))
+}
