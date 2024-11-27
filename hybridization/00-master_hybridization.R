@@ -43,7 +43,7 @@ cat("Starting analysis:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
 #########################################
 cat("Loading functions...\n")
 tryCatch({
-  source("1-network_functions_hybridizationSim.R")
+  source("01-functions_hybridization.R")
   cat("Successfully loaded network functions\n")
 }, error = function(e) {
   cat("Error loading network functions:", conditionMessage(e), "\n")
@@ -55,7 +55,7 @@ tryCatch({
 #########################################
 cat("\nRunning simulation...\n")
 tryCatch({
-  source("2-run_simulation.R")
+  source("02-simulation_hybridization.R")
   cat("Successfully completed simulation\n")
 }, error = function(e) {
   cat("Error in simulation:", conditionMessage(e), "\n")
@@ -67,7 +67,7 @@ tryCatch({
 #########################################
 cat("\nGenerating plots...\n")
 tryCatch({
-  source("3-generate_plots.R")
+  source("03-visualization_hybridization.R")
   cat("Successfully created plots\n")
 }, error = function(e) {
   cat("Error creating plots:", conditionMessage(e), "\n")
