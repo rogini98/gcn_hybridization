@@ -143,3 +143,30 @@ genotype_to_netexpr <- function(genotype, intercepts, betas, effect_matrices, ne
   
   return(null_expression)
 }
+
+#' Calculate network metrics from a correlation/adjacency matrix
+#' @param matrix Correlation or adjacency matrix
+#' @param threshold Correlation threshold for edge creation
+calculate_network_metrics <- function(matrix, threshold = 0.2) {
+  adj_matrix <- matrix > threshold
+  g <- graph_from_adjacency_matrix(adj_matrix, mode = "undirected")
+  comm <- cluster_fast_greedy(g)
+  
+  return(list(
+    mean_degree = mean(degree(g)),
+    modularity = modularity(g, membership(comm)),
+    transitivity = transitivity(g, type = "global")
+  ))
+}
+
+#' Create network metrics data frame
+#' @param metrics List of network metrics
+#' @param identifier Replicate or migration rate identifier
+create_network_metrics_df <- function(metrics, identifier) {
+  data.frame(
+    identifier = identifier,
+    mean_degree = metrics$mean_degree,
+    modularity = metrics$modularity,
+    transitivity = metrics$transitivity
+  )
+}

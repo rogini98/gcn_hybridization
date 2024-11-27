@@ -30,3 +30,34 @@ calculate_average_correlation <- function(results) {
   }
   return(NULL)
 }
+
+#' Calculate summary statistics for network metrics
+#' @param results Data frame of network metrics
+#' @param group_var Variable to group by (generation or migration_rate)
+calculate_summary_stats <- function(results, group_var) {
+  results %>%
+    group_by(!!sym(group_var)) %>%
+    summarise(
+      mean_degree_mean = mean(mean_degree),
+      mean_degree_se = sd(mean_degree)/sqrt(n()),
+      modularity_mean = mean(modularity),
+      modularity_se = sd(modularity)/sqrt(n()),
+      transitivity_mean = mean(transitivity),
+      transitivity_se = sd(transitivity)/sqrt(n()),
+      .groups = 'drop'
+    )
+}
+
+#' Save simulation results and parameters
+#' @param results List of results
+#' @param params List of parameters
+#' @param output_file Output file path
+save_simulation_results <- function(results, params, output_file) {
+  saveRDS(
+    list(
+      results = results,
+      parameters = params
+    ),
+    output_file
+  )
+}

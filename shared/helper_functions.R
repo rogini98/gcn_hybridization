@@ -90,3 +90,40 @@ genotype_to_nullexpr <- function(genotype, intercepts, betas) {
   expression <- rpois(n = N_genes, lambda)
   return(list(expression = expression, genome_val = genome_val))
 }
+
+#' Set up parallel processing cluster
+#' @param n_replicates Number of replicates
+#' @param required_objects Vector of object names to export
+#' @param required_packages Vector of package names to load
+setup_parallel_cluster <- function(n_replicates, required_objects, required_packages) {
+  n_cores <- min(detectCores() - 1, n_replicates)
+  cl <- makeCluster(n_cores)
+  registerDoParallel(cl)
+  
+  # Export necessary objects to cluster
+  clusterExport(cl, required_objects)
+  
+  # Load required packages on each node
+  if(!is.null(required_packages)) {
+    clusterEvalQ(cl, {
+      for(pkg in required_packages) {
+        library(pkg, character.only = TRUE)
+      }
+    })
+  }
+  
+  return(cl)
+}
+
+#' Create output directories
+#' @param base_dir Base directory path
+#' @param subdirs Vector of subdirectory names
+create_output_dirs <- function(base_dir, subdirs) {
+  for(dir in subdirs) {
+    dir.create(
+      file.path(base_dir, dir), 
+      recursive = TRUE, 
+      showWarnings = FALSE
+    )
+  }
+}
