@@ -35,7 +35,7 @@ get_allele_freq <- function(population) {
 ### Expression and Network Functions
 #############################################
 
-#' Generate transcriptome genetic architecture
+# 2. Generate transcriptome genetic architecture #######
 #' @param N_genes Number of genes
 #' @param meanexpr Mean expression level
 #' @param sd.expr Standard deviation of expression
@@ -54,44 +54,11 @@ generate_transcriptome_parameters <- function(N_genes, meanexpr = 5, sd.expr = 2
 }
 
 
-
-
-
-
-#############################################
-### Network Analysis Functions
-#############################################
-
-
-#' Create averaged correlation matrix from multiple replicates
-#' @param results List of simulation results for a given migration rate
-#' @return Average correlation matrix
-calculate_average_correlation <- function(results) {
-  # Extract correlation matrices from all replicates
-  cor_matrices <- lapply(results$replicates, function(rep) {
-    if(!is.null(rep$transcriptomes)) {
-      return(cor(rep$transcriptomes$r))
-    }
-    return(NULL)
-  })
-  
-  # Remove NULL entries
-  cor_matrices <- cor_matrices[!sapply(cor_matrices, is.null)]
-  
-  # Calculate average correlation matrix
-  if(length(cor_matrices) > 0) {
-    avg_cor <- Reduce('+', cor_matrices) / length(cor_matrices)
-    return(avg_cor)
-  }
-  return(NULL)
-}
-
-
 #############################################
 ### Parameter Initialization
 #############################################
 
-#' Initialize all simulation parameters
+# 3. Initialize all simulation parameters ##############
 #' @return List of all parameters needed for simulation
 initialize_parameters <- function(Chr.lengths, PopSize, Generations,
                                   network_params, expression_params) {
@@ -145,7 +112,7 @@ initialize_parameters <- function(Chr.lengths, PopSize, Generations,
 ########################################
 # Simulation runner functions
 ########################################
-#' Run introgression simulation with tracking
+# 4. Run introgression simulation with tracking #############
 #' @param Generations Number of generations
 #' @param PopSize Population size
 #' @param Chr.lengths Vector of chromosome lengths
@@ -218,7 +185,7 @@ introgressing_with_tracking <- function(Generations, PopSize, Chr.lengths, migra
   ))
 }
 
-#' Run replicated introgression simulations
+# 5. Run replicated introgression simulations ###########
 #' @param Generations Number of generations
 #' @param PopSize Population size
 #' @param Chr.lengths Vector of chromosome lengths
@@ -316,7 +283,7 @@ run_replicated_introgression <- function(Generations, PopSize, Chr.lengths, migr
   ))
 }
 
-#' Run network simulations
+# 6. Run network simulations #########################
 #' @param migration_rates Vector of migration rates to test
 #' @param params List of simulation parameters
 #' @param n_replicates Number of replicates per migration rate
@@ -349,7 +316,7 @@ run_network_simulations <- function(migration_rates, params, n_replicates = 10,
   return(results_list)
 }
 
-#' Run tracked simulations
+# 7. Run tracked simulations ##########################
 #' @param migration_rates Vector of migration rates to test
 #' @param params List of simulation parameters
 #' @param n_replicates Number of replicates per migration rate
@@ -399,7 +366,7 @@ run_tracked_simulations <- function(migration_rates, params, n_replicates = 10,
   ))
 }
 
-# Generate a summary report
+# 8. Generate a summary report ################
 generate_summary_report <- function(results, config, output_dir) {
   # Create report file
   report_file <- file.path(output_dir, "simulation_summary.txt")
