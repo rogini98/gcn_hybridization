@@ -170,3 +170,28 @@ create_network_metrics_df <- function(metrics, identifier) {
     transitivity = metrics$transitivity
   )
 }
+
+#' Calculate average correlation matrix from multiple replicates
+#' @param results List of simulation results containing transcriptomes
+#' @return Average correlation matrix or NULL if no valid results
+#' @examples
+#' avg_cor <- calculate_average_correlation(simulation_results)
+calculate_average_correlation <- function(results) {
+  # Extract correlation matrices from all replicates
+  cor_matrices <- lapply(results$replicates, function(rep) {
+    if(!is.null(rep$transcriptomes)) {
+      return(cor(rep$transcriptomes$r))
+    }
+    return(NULL)
+  })
+  
+  # Remove NULL entries
+  cor_matrices <- cor_matrices[!sapply(cor_matrices, is.null)]
+  
+  # Calculate average correlation matrix
+  if(length(cor_matrices) > 0) {
+    avg_cor <- Reduce('+', cor_matrices) / length(cor_matrices)
+    return(avg_cor)
+  }
+  return(NULL)
+}

@@ -78,7 +78,6 @@ mate <- function(parent1, parent2) {
 #' expression: baseline expression values,  
 #' genome_val: Numeric vector of diploid genotype values (0,1,2) for each gene
 #' 
-
 genotype_to_nullexpr <- function(genotype, intercepts, betas) {
   NChr <- length(genotype) 
   genome_val <- c()
@@ -90,6 +89,34 @@ genotype_to_nullexpr <- function(genotype, intercepts, betas) {
   expression <- rpois(n = N_genes, lambda)
   return(list(expression = expression, genome_val = genome_val))
 }
+
+#' Calculate summary statistics with confidence intervals
+#' @param data Data frame containing metrics
+#' @param group_var Name of grouping variable
+#' @param value_var Name of value variable
+#' @return Data frame with summary statistics
+calculate_summary_stats <- function(data, group_var, value_var = "value") {
+  # Input validation
+  if(!all(c(group_var, value_var) %in% names(data))) {
+    stop("Required columns not found in data")
+  }
+  
+  # Calculate statistics
+  stats <- data %>%
+    dplyr::group_by(!!sym(group_var)) %>%
+    dplyr::summarise(
+      n = n(),
+      mean_val = mean(!!sym(value_var)),
+      sd_val = sd(!!sym(value_var)),
+      se = sd_val / sqrt(n),
+      ci_lower = mean_val - qt(0.975, n - 1) * se,
+      ci_upper = mean_val + qt(0.975, n - 1) * se,
+      .groups = 'drop'
+    )
+  
+  return(stats)
+}
+
 
 #' Set up parallel processing cluster
 #' @param n_replicates Number of replicates
@@ -115,15 +142,42 @@ setup_parallel_cluster <- function(n_replicates, required_objects, required_pack
   return(cl)
 }
 
-#' Create output directories
+##' Save plot with standardized settings
+#' @param plot ggplot object to save
+#' @param filename Output filename
+#' @param width Plot width in inches
+#' @param height Plot height in inches
+#' @param dpi Resolution in dots per inch
+save_plot <- function(plot, filename, width, height, dpi = 300) {
+  # Create directory if it doesn't exist
+  dir.create(dirname(filename), recursive = TRUE, showWarnings = FALSE)
+  
+  # Save plot
+  ggsave(
+    filename = filename,
+    plot = plot,
+    width = width,
+    height = height,
+    dpi = dpi
+  )
+}
+
+#' Create standardized output directory structure
 #' @param base_dir Base directory path
 #' @param subdirs Vector of subdirectory names
+#' @return Vector of created directory paths
 create_output_dirs <- function(base_dir, subdirs) {
-  for(dir in subdirs) {
-    dir.create(
-      file.path(base_dir, dir), 
-      recursive = TRUE, 
-      showWarnings = FALSE
-    )
+  # Create base directory if it doesn't exist
+  if(!dir.exists(base_dir)) {
+    dir.create(base_dir, recursive = TRUE, showWarnings = FALSE)
   }
+  
+  # Create subdirectories
+  created_dirs <- vapply(subdirs, function(d) {
+    path <- file.path(base_dir, d)
+    dir.create(path, recursive = TRUE, showWarnings = FALSE)
+    return(path)
+  }, character(1))
+  
+  return(created_dirs)
 }
