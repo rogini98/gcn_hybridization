@@ -3,14 +3,14 @@ library(parallel)
 library(doParallel)
 library(foreach)
 library(tidyverse)
-source("1-network_functions_hybridizationSim.R")
+source("01-functions_hybridization.R")
 
-# Set up initial parameters
+# Set up initial parameters to match documentation
 Chr.lengths <- c(10, 10, 5, 5, 10)
 N_genes <- sum(Chr.lengths)
-meanexpr <- 5
-sd.expr <- 2
-sd.beta <- 3
+meanexpr <- 5          # μ_α = 5 from text
+sd.expr <- 2           # σ_α = 2 from text
+sd.beta <- 2          # Changed from 3 to 2 to match σ_β = 2 from text
 threshold <- 0.2
 
 # Generate transcriptome parameters
@@ -18,11 +18,12 @@ set.seed(123)
 intercepts <- rnorm(N_genes, meanexpr, sd.expr)
 betas <- rnorm(N_genes, mean = 0, sd.beta)
 
-# Network parameters
-network_density00 <- 0.03
-network_effect00 <- 2
-network_density11 <- 0.01
-network_effect11 <- 2.5
+# Network parameters updated to match text
+network_density00 <- 0.2    # Changed from 0.03 to 0.2 to match text
+network_effect00 <- 2       # σ_γ = 2 from text
+network_density11 <- 0.1    # Changed from 0.01 to 0.1 to match text
+network_effect11 <- 2.5     # From text
+
 
 # Create network architecture
 neteQTLlocus <- sample(1:N_genes, 1)
