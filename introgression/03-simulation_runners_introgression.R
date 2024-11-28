@@ -8,8 +8,8 @@ library(ggplot2)
 library(patchwork)
 
 # Source core functions
-source("01-network_functions_introgressionSim.R")
-source("02-visualization_functions_introgression.R")
+source("./introgression/01-network_functions_introgressionSim.R")
+source("./introgression/02-visualization_functions_introgression.R")
 
 #############################################
 ### Parameter Initialization
