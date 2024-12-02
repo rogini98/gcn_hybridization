@@ -21,10 +21,10 @@ library(Matrix)
 library(tidyverse)
 
 # Source required functions
-source("./introgression/01-network_functions_introgressionSim.R")
-source("./introgression/02-visualization_functions_introgression.R")
-source("./introgression/03-simulation_runners_introgression.R")
-source("./introgression/04-network_analysis_introgression.R")
+source("./sim_introgression/01-network_functions_introgressionSim.R")
+source("./sim_introgression/02-visualization_functions_introgression.R")
+source("./sim_introgression/03-simulation_runners_introgression.R")
+source("./sim_introgression/04-network_analysis_introgression.R")
 
 # Create output directories
 output_dir <- "output-introgression/"
