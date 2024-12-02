@@ -42,7 +42,7 @@ cat("Starting analysis:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
 # 1. Source functions and set parameters
 #########################################
 cat("Loading functions...\n")
-source("./hybridization/01-network_functions_hybridizationSim.R")
+source("./sim_hybridization/01-network_functions_hybridizationSim.R")
 
 # Define plot.gene.net function
 plot.gene.net <- function(cormat, Chr.lengths, layout = "circle"){
