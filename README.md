@@ -105,8 +105,8 @@ required_packages <- c(
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/rogini98/gcn_evolution.git
-cd gcn_evolution
+git clone https://github.com/rogini98/gcn_hybridization.git
+cd gcn_hybridization
 ```
 
 2. Run all simulations:
