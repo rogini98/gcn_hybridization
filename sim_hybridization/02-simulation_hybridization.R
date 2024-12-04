@@ -3,7 +3,7 @@ library(parallel)
 library(doParallel)
 library(foreach)
 library(tidyverse)
-source("01-functions_hybridization.R")
+source("./sim_hybridization/01-functions_hybridization.R")
 
 # Set up initial parameters to match documentation
 Chr.lengths <- c(10, 10, 5, 5, 10)
