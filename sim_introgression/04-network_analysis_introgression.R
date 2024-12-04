@@ -1,4 +1,4 @@
-# run_network_analysis.R
+# 04-network_analysis_introgression.R
 # Enhanced network analysis tracking and visualization
 # Author: Modified based on original code
 # Last updated: November 25, 2024
@@ -104,7 +104,7 @@ run_network_analysis <- function(migration_rates = exp(seq(-10, 0, by = 0.01)),
     modularity = double()
   )
   
-  # Initialize parameters (ensure these are available in your environment)
+  # Initialize parameters 
   params <- initialize_parameters()
   
   # Run simulations for each migration rate
@@ -202,13 +202,3 @@ create_summary_plots <- function(network_metrics, output_dir) {
     height = 12
   )
 }
-
-# # Example usage
-# if (FALSE) {
-#   # Run analysis
-#   network_metrics <- run_network_analysis(
-#     migration_rates = exp(seq(-10, 0, by = 0.01)),
-#     Nreps = 1,
-#     Fgen = 100,
-#     threshold = 0.2
-#   )
