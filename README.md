@@ -155,7 +155,9 @@ migration_rates_network <- exp(seq(-10, 0, by = 0.01))
 ## Citation
 
 If you use this code in your research, please cite:
-[Citation information to be added]
+
+Runghen Rogini, Bolnick Daniel I. (2024).  Effects of hybridization and gene flow in GCN - Simulation Code (Version v1.0.3). Zenodo. https://doi.org/10.5281/zenodo.14271749
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14271749.svg)](https://doi.org/10.5281/zenodo.14271749)
 
 ## Contact
 
